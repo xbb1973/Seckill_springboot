@@ -1,0 +1,12 @@
+#JDBC，默认使用org.apache.tomcat.jdbc.pool.DataSource作为数据源；
+spring:
+    datasource:
+        username: root
+        password: 123
+        url: jdbc:mysql:///seckill?useSSL=false&useUnicode=true&characterEncoding=utf-8
+        driver‐class‐name: com.mysql.jdbc.Driver
+        #自定义使用druid数据源
+        type: com.alibaba.druid.pool.DruidDataSource
+
+mybatis:
+    mapper-locations: classpath:mapping/*Mapper.xml
