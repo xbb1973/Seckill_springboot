@@ -1,6 +1,7 @@
 package slf.xbb.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.security.MD5Encoder;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,44 @@ public class UserController extends BaseController {
     @Autowired
     private HttpServletRequest httpServletRequest;
 
+    /**
+     * 用户登陆接口
+     * @param telphone
+     * @param password
+     * @return
+     * @throws BussinessException
+     */
+    @RequestMapping(path = "/login", method = {RequestMethod.POST}, consumes = {CONTENT_TYPE_FORMED})
+    @ResponseBody
+    public CommonReturnType login(@RequestParam(name = "telphone") String telphone,
+                                     @RequestParam(name = "password") String password) throws BussinessException, NoSuchAlgorithmException {
+        // 入参校验，两个参数都不允许为空
+        if (StringUtils.isEmpty(telphone) || StringUtils.isEmpty(password)) {
+            throw new BussinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
+        }
+
+        // 用户登陆服务，校验用户参数是否合法
+        UserModel userModel = userService.validateLogin(telphone, this.EncodePasswordByMD5(password));
+
+        // 将登陆凭证加入到用户登陆成功的session内
+        // 进阶-分布式-token实现
+        this.httpServletRequest.getSession().setAttribute("IS_LOGIN", true);
+        this.httpServletRequest.getSession().setAttribute("LOGIN_USER", userModel);
+
+        return CommonReturnType.create(null);
+    }
+
+    /**
+     * 用户注册接口
+     * @param telphone
+     * @param otpCode
+     * @param name
+     * @param gender
+     * @param age
+     * @param password
+     * @return
+     * @throws BussinessException
+     */
     @RequestMapping(path = "/register", method = {RequestMethod.POST}, consumes = {CONTENT_TYPE_FORMED})
     @ResponseBody
     public CommonReturnType register(@RequestParam(name = "telphone") String telphone,

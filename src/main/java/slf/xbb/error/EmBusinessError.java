@@ -16,7 +16,9 @@ public enum EmBusinessError implements CommonError {
     // 用户信息错误
     USER_NOT_EXIST(501, "用户不存在"),
     // 未知错误错误
-    UNKNOWN_ERROR(502, "未知错误")
+    UNKNOWN_ERROR(502, "未知错误"),
+    // 未知错误错误
+    USER_LOGIN_ERROR(503, "用户手机号或者密码错误")
     ;
 
     private int errCode;

@@ -17,4 +17,5 @@ public interface UserService {
      */
     UserModel getUserById(Integer id);
     void register(UserModel userModel) throws BussinessException;
+    UserModel validateLogin(String telphone, String encryptPassword) throws BussinessException;
 }

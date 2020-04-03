@@ -15,6 +15,8 @@ import slf.xbb.error.BussinessException;
 import slf.xbb.error.EmBusinessError;
 import slf.xbb.service.UserService;
 import slf.xbb.service.model.UserModel;
+import slf.xbb.validator.ValidationResult;
+import slf.xbb.validator.ValidatorImpl;
 
 /**
  * @author ：xbb
@@ -33,6 +35,27 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserPasswordDoMapper userPasswordDoMapper;
 
+    @Autowired
+    private ValidatorImpl validator;
+
+    @Override
+    public UserModel validateLogin(String telphone, String encryptPassword) throws BussinessException {
+        // 通过用户手机获取用户信息
+        UserDo userDo = userDoMapper.selectByTelphone(telphone);
+        if (userDo == null) {
+            throw new BussinessException(EmBusinessError.USER_LOGIN_ERROR);
+        }
+        UserPasswordDo userPasswordDo = userPasswordDoMapper.selectByUserId(userDo.getId());
+        UserModel userModel = convertFromDataObject(userDo, userPasswordDo);
+
+        // 比对用户信息内加密的密码是否和传输进来的密码相匹配
+        if (!StringUtils.equals(encryptPassword, userModel.getEncrptPassword())) {
+            throw new BussinessException(EmBusinessError.USER_LOGIN_ERROR);
+        }
+        // 没有异常抛出，直接return，表示登陆成功
+        return userModel;
+    }
+
     @Override
     public UserModel getUserById(Integer id) {
         UserDo userDo = userDoMapper.selectByPrimaryKey(id);
@@ -41,17 +64,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = BussinessException.class)
     public void register(UserModel userModel) throws BussinessException {
         if (userModel == null) {
             throw new BussinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
         }
-        if (StringUtils.isEmpty(userModel.getName())
-                || userModel.getGender() == null
-                || userModel.getAge() == null
-                || StringUtils.isEmpty(userModel.getTelphone())) {
-            throw new BussinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
+        // if (StringUtils.isEmpty(userModel.getName())
+        //         || userModel.getGender() == null
+        //         || userModel.getAge() == null
+        //         || StringUtils.isEmpty(userModel.getTelphone())) {
+        //     throw new BussinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
+        // }
+        ValidationResult result = validator.validationResult(userModel);
+        if (result.isHasErrors()) {
+            throw new BussinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, result.getErrMsg());
         }
+
 
         // 实现model->data object->persist layer
         // UserDo
