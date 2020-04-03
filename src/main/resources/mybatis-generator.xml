@@ -41,9 +41,13 @@
             <property name="enableSubPackages" value="true"/>
         </javaClientGenerator>
         <!--生成对应表及类名-->
-        <table schema="seckill" tableName="item" domainObjectName="ItemDo"></table>
-        <table schema="seckill" tableName="user_info" domainObjectName="UserDo"></table>
-        <table schema="seckill" tableName="user_password" domainObjectName="UserPasswordDo"></table>
+        <!--每次生成前，把已经生成过的table注释掉-->
+        <!--<table schema="seckill" tableName="user_info" domainObjectName="UserDo"></table>-->
+        <!--<table schema="seckill" tableName="user_password" domainObjectName="UserPasswordDo"></table>-->
+        <!--<table schema="seckill" tableName="item" domainObjectName="ItemDo"></table>-->
+        <!--<table schema="seckill" tableName="item_stock" domainObjectName="ItemStockDo"></table>-->
+
+
         <!--<table schema="DB2ADMIN" tableName="ALLTYPES" domainObjectName="Customer">-->
         <!--    <property name="useActualColumnNames" value="true"/>-->
         <!--    <generatedKey column="ID" sqlStatement="DB2" identity="true"/>-->

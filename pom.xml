@@ -166,7 +166,8 @@
             <!--允许移动生成的文件-->
             <verbose>true</verbose>
             <!--允许自动覆盖文件（生产环境中千万不要这样做）-->
-            <overwrite>true</overwrite>
+            <!--目前项目中的mapper中有些自定义的方法，覆盖文件会吃屎。。。-->
+            <overwrite>false</overwrite>
             <configurationFile>
               src/main/resources/mybatis-generator.xml
             </configurationFile>

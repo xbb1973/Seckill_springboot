@@ -37,7 +37,6 @@ import java.util.Random;
 @Controller("user")
 @RequestMapping("/user")
 //跨域请求中，不能做到session共享
-@ConditionalOnClass(CharacterEncodingFilter.class)
 @CrossOrigin(allowCredentials = "true", allowedHeaders = "*")
 public class UserController extends BaseController {
 

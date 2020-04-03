@@ -1,5 +1,6 @@
 package slf.xbb.service;
 
+import org.apache.ibatis.annotations.Param;
 import slf.xbb.error.BussinessException;
 import slf.xbb.service.model.UserModel;
 
@@ -14,8 +15,23 @@ public interface UserService {
     /**
      * 通过用户id获取UserDo对象
      * @param id
+     * @return
      */
     UserModel getUserById(Integer id);
+
+    /**
+     * 用户注册接口
+     * @param userModel
+     * @throws BussinessException
+     */
     void register(UserModel userModel) throws BussinessException;
+
+    /**
+     * 登陆验证接口
+     * @param telphone
+     * @param encryptPassword
+     * @return
+     * @throws BussinessException
+     */
     UserModel validateLogin(String telphone, String encryptPassword) throws BussinessException;
 }
