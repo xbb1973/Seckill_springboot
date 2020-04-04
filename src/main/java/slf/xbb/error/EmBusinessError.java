@@ -18,7 +18,9 @@ public enum EmBusinessError implements CommonError {
     // 未知错误错误
     UNKNOWN_ERROR(502, "未知错误"),
     // 未知错误错误
-    USER_LOGIN_ERROR(503, "用户手机号或者密码错误")
+    USER_LOGIN_ERROR(503, "用户手机号或者密码错误"),
+    STOCK_NOT_ENOUGH(504, "库存不足"),
+    USER_NOT_LOGIN(505, "用户未登陆")
     ;
 
     private int errCode;

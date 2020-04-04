@@ -62,6 +62,11 @@ public interface UserPasswordDoMapper {
      */
     UserPasswordDo selectByPrimaryKey(Integer id);
 
+    /**
+     * 
+     * @param id
+     * @return
+     */
     UserPasswordDo selectByUserId(Integer id);
 
     /**

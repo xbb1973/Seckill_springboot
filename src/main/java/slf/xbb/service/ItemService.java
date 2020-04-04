@@ -28,4 +28,19 @@ public interface ItemService {
      * 商品详情浏览
      */
     ItemModel getItemById(Integer id);
+
+    /**
+     * 削减库存
+     * @param itemId
+     * @param amount
+     * @return
+     */
+    boolean decreaseStock(Integer itemId, Integer amount);
+
+    /**
+     * 商品销量增加，意味着库存削减成功，下单成功
+     * @param itemId
+     * @param amount
+     */
+    void increseSales(Integer itemId, Integer amount);
 }

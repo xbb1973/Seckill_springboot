@@ -1,6 +1,7 @@
 package slf.xbb.dao;
 
 import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 import slf.xbb.domain.ItemStockDo;
 import slf.xbb.domain.ItemStockDoExample;
@@ -64,6 +65,7 @@ public interface ItemStockDoMapper {
 
     /**
      * 根据商品item_id获取商品库存
+     *
      * @param id
      * @return
      */
@@ -100,4 +102,12 @@ public interface ItemStockDoMapper {
      * @mbg.generated Fri Apr 03 19:08:00 CST 2020
      */
     int updateByPrimaryKey(ItemStockDo record);
+
+    /**
+     * 削减库存
+     * @param itemId
+     * @param amount
+     * @return
+     */
+    int decreaseStock(@Param("itemId") Integer itemId, @Param("amount") Integer amount);
 }

@@ -1,6 +1,7 @@
 package slf.xbb.dao;
 
 import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 import slf.xbb.domain.ItemDo;
 import slf.xbb.domain.ItemDoExample;
@@ -64,6 +65,7 @@ public interface ItemDoMapper {
 
     /**
      * 获取所有的items order by sales desc
+     *
      * @return
      */
     List<ItemDo> listItem();
@@ -99,4 +101,6 @@ public interface ItemDoMapper {
      * @mbg.generated Thu Apr 02 09:42:15 CST 2020
      */
     int updateByPrimaryKey(ItemDo record);
+
+    int increseSales(@Param("id") Integer id, @Param("amount") Integer amount);
 }

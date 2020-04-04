@@ -45,8 +45,8 @@
         </div>
     </div>
     <div class="form-actions">
-        <button class="btn blue" id="buy_item" type="submit">
-            购买商品
+        <button class="btn blue" id="create_order" type="submit">
+            购买商品，创建订单
         </button>
     </div>
 </div>
@@ -68,7 +68,6 @@
             success: function (data) {
                 if (data.status == "success") {
                     alert("获取商品详情成功");
-                    // window.location.href = "list.html";
                     g_itemVo = data.data;
                     reloadDom();
                 } else {
@@ -79,7 +78,36 @@
                 alert("获取商品详情失败，原因为" + data.responseText);
             }
         });
-        return false;
+
+        $("#create_order").on("click", function () {
+            //映射到后端@RequestMapping(value = "/item/get", method = {RequestMethod.POST}, consumes = {CONTENT_TYPE_FORMED})
+            $.ajax({
+                type: "POST",
+                url: "http://localhost:8080/order/create",
+                contentType: "application/x-www-form-urlencoded",
+                data: {
+                    "itemId": g_itemVo.id,
+                    "amount": 1,
+                },
+                //允许跨域请求
+                xhrFields: {withCredentials: true},
+                success: function (data) {
+                    if (data.status == "success") {
+                        alert("下单成功");
+                        window.location.reload();
+                    } else {
+                        alert("下单失败，原因为" + data.data.errMsg);
+                        if (data.data.errCode == 505) {
+                            window.location.href = "user_login.html";
+                        }
+                    }
+                },
+                error: function (data) {
+                    alert("下单失败，原因为" + data.responseText);
+                }
+            });
+            return false;
+        })
     });
 
     function getParam(paramName) {

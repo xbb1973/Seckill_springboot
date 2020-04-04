@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import slf.xbb.controller.view.ItemVo;
 import slf.xbb.error.BussinessException;
 import slf.xbb.response.CommonReturnType;
+import slf.xbb.service.ItemService;
 import slf.xbb.service.impl.ItemServiceImpl;
 import slf.xbb.service.model.ItemModel;
 
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
 public class ItemController extends BaseController {
 
     @Autowired
-    ItemServiceImpl itemService;
+    private ItemService itemService;
 
     /**
      * 创建商品的controller，尽量使controller简单，让service复杂，把服务逻辑聚合在service内部

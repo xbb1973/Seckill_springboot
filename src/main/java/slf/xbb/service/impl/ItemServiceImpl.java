@@ -99,6 +99,41 @@ public class ItemServiceImpl implements ItemService {
         return convertToItemModel(itemDo, itemStockDo);
     }
 
+    /**
+     * 削减库存
+     *
+     * @param itemId
+     * @param amount
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = BussinessException.class)
+    public boolean decreaseStock(Integer itemId, Integer amount) {
+        // affectRows = 0时是where条件判断失败
+        // affectRows = 1时更新库存成功
+        int affectRows = itemStockDoMapper.decreaseStock(itemId, amount);
+        if (affectRows > 0) {
+            // 更新库存成功
+            return true;
+        } else {
+            // 更新库存失败
+            return false;
+        }
+    }
+
+    /**
+     * 商品销量增加，意味着库存削减成功，下单成功
+     *
+     * @param itemId
+     * @param amount
+     */
+    @Override
+    @Transactional
+    public void increseSales(Integer itemId, Integer amount) {
+        itemDoMapper.increseSales(itemId, amount);
+
+    }
+
     private ItemDo convertFromItemModelToItemDo(ItemModel itemModel) {
         if (itemModel == null) {
             return null;

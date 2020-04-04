@@ -318,4 +318,10 @@
   <!--通过telphone unique index来查找用户信息-->
   <!--没有设置keyProperty="id" useGeneratedKeys="true"-->
   <!--就无法将其复制出来给UserDo-->
+  <select id="selectByTelphone" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from user_info
+    where telphone = #{telphone,jdbcType=VARCHAR}
+  </select>
 </mapper>
