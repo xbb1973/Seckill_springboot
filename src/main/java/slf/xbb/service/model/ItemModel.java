@@ -56,4 +56,9 @@ public class ItemModel {
     @NotBlank(message = "图片信息不能为空")
     private String imgUrl;
 
+    /**
+     * 使用聚合模型，冗余PromoModel
+     * 如果promomodel不为空，表示其拥有还未结束的秒杀活动（包含status=1 、2）
+     */
+    private PromoModel promoModel;
 }

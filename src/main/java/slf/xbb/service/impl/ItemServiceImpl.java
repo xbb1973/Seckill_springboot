@@ -7,12 +7,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import slf.xbb.dao.ItemDoMapper;
 import slf.xbb.dao.ItemStockDoMapper;
+import slf.xbb.dao.PromoDoMapper;
 import slf.xbb.domain.ItemDo;
 import slf.xbb.domain.ItemStockDo;
 import slf.xbb.error.BussinessException;
 import slf.xbb.error.EmBusinessError;
 import slf.xbb.service.ItemService;
+import slf.xbb.service.PromoService;
 import slf.xbb.service.model.ItemModel;
+import slf.xbb.service.model.PromoModel;
 import slf.xbb.validator.ValidationResult;
 import slf.xbb.validator.ValidatorImpl;
 
@@ -39,6 +42,9 @@ public class ItemServiceImpl implements ItemService {
     @Autowired
     private ItemStockDoMapper itemStockDoMapper;
 
+    @Autowired
+    private PromoService promoService;
+
     /**
      * 创建商品
      *
@@ -60,12 +66,8 @@ public class ItemServiceImpl implements ItemService {
         itemModel.setId(itemDo.getId());
 
         // 库存Do做同样的操作
-        try {
-            ItemStockDo itemStockDo = convertFromItemModelToItemStockDo(itemModel);
-            itemStockDoMapper.insertSelective(itemStockDo);
-        } catch (Exception e) {
-            log.info("{}", e.getMessage());
-        }
+        ItemStockDo itemStockDo = convertFromItemModelToItemStockDo(itemModel);
+        itemStockDoMapper.insertSelective(itemStockDo);
 
         return getItemById(itemModel.getId());
     }
@@ -91,12 +93,24 @@ public class ItemServiceImpl implements ItemService {
      */
     @Override
     public ItemModel getItemById(Integer id) {
+        // 操作数据库获取item
         ItemDo itemDo = itemDoMapper.selectByPrimaryKey(id);
         if (itemDo == null) {
             return null;
         }
+        // 操作数据库获取itemStock
         ItemStockDo itemStockDo = itemStockDoMapper.selectByItemId(itemDo.getId());
-        return convertToItemModel(itemDo, itemStockDo);
+
+        // 聚合成itemModel
+        ItemModel itemModel = convertToItemModel(itemDo, itemStockDo);
+
+        // 获取item promo信息，聚合到item model中
+        PromoModel promoModel = promoService.getPromoByItemId(itemModel.getId());
+        if (promoModel != null && promoModel.getStatus() != 3) {
+            itemModel.setPromoModel(promoModel);
+        }
+
+        return itemModel;
     }
 
     /**

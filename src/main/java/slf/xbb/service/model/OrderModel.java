@@ -32,6 +32,8 @@ public class OrderModel {
     /**
      * 购买商品的单价，记录下单时的商品价格，
      * 因为商品价格会变动，需要冗余一个属性来保存当时的下单单价
+     * 若promoId空，则表示以itemPrice价格下单
+     * 若promoId非空，则表示以promoPrice价格下单
      */
     private BigDecimal itemPrice;
 
@@ -44,5 +46,16 @@ public class OrderModel {
      * 购买金额
      */
     private BigDecimal orderPrice;
+
+    /**
+     * 若非空，则表示以秒杀商品方式下单
+     */
+    private Integer promoId;
+
+    /**
+     * 若promoId空，则表示以itemPrice价格下单
+     * 若promoId非空，则表示以promoPrice价格下单
+     */
+    private BigDecimal promoPrice;
 
 }

@@ -1,6 +1,7 @@
 package slf.xbb.controller.view;
 
 import lombok.Data;
+import org.joda.time.DateTime;
 
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Min;
@@ -55,5 +56,36 @@ public class ItemVo {
      */
     // @NotBlank(message = "图片信息不能为空")
     private String imgUrl;
+
+    /**
+     * 聚合PromoVo
+     */
+    // private PromoVo promoVo;
+
+
+    /**
+     * 0、没有活动
+     * 1、活动待开始
+     * 2、活动进行中
+     * 3、活动结束
+     */
+    private Integer promoStatus;
+
+    /**
+     * 活动优惠价格
+     */
+    private BigDecimal promoPrice;
+
+    /**
+     * 活动id，之后的交易行为需要活动id
+     */
+    private Integer promoId;
+
+    /**
+     * 活动开始和截止时间，用于做倒计时展示
+     */
+    private String promoStartDate;
+
+    private String promoEndDate;
 
 }

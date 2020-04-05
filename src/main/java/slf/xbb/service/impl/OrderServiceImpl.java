@@ -95,6 +95,73 @@ public class OrderServiceImpl implements OrderService {
         return orderModel;
     }
 
+    /**
+     * 创建订单，对应的请求体需要参数为：用户id 商品id 购买数量
+     * 秒杀方案选择：
+     * 1、（通过url判断活动，推荐使用）通过前端url上传过来秒杀活动id，然后下单接口内校验对应id是否属于对应商品且活动已开始
+     * 2、（在接口内判断活动，不做活动对也要判断）直接在下单接口内判断对应商品是否存在秒杀活动，若存在进行中则已秒杀价格下单
+     *
+     * @param userId
+     * @param itemId
+     * @param promoId
+     * @param amount
+     * @return
+     */
+    @Transactional
+    @Override
+    public OrderModel createOrder(Integer userId, Integer itemId, Integer promoId, Integer amount) throws BussinessException {
+
+        // 1、(校验商品、用户、活动信息等)检验下单状态，下单的商品是否存在，用户是否合法，购买数量是否正确
+        UserModel userModel = userService.getUserById(userId);
+        ItemModel itemModel = itemService.getItemById(itemId);
+        if (userModel == null || itemModel == null || (amount <= 0 || amount > 99)) {
+            throw new BussinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "商品/用户信息/购买数量：参数异常");
+        }
+        // 校验活动信息
+        if (promoId != null) {
+            // 校验活动是否存在这个使用商品
+            // 校验活动是否进行中
+            //
+            if (promoId.intValue() != itemModel.getPromoModel().getId()) {
+                throw new BussinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "活动信息不正确");
+            } else if (itemModel.getPromoModel().getStatus() != 2) {
+                throw new BussinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "活动还未开始");
+            }
+        }
+        // 2、落单减库存 / 支付减库存（支付减库存会出现超卖的问题）
+        boolean hasDecreaseStock = itemService.decreaseStock(itemId, amount);
+        if (!hasDecreaseStock) {
+            throw new BussinessException(EmBusinessError.STOCK_NOT_ENOUGH);
+        }
+
+        // 3、订单入库
+        OrderModel orderModel = new OrderModel();
+        orderModel.setItemId(itemId);
+        orderModel.setUserId(userId);
+        orderModel.setAmount(amount);
+        if (promoId == null) {
+            orderModel.setItemPrice(itemModel.getPrice());
+        } else {
+            orderModel.setItemPrice(itemModel.getPromoModel().getPromoItemPrice());
+        }
+        orderModel.setOrderPrice(orderModel.getItemPrice().multiply(new BigDecimal(amount)));
+        orderModel.setPromoId(promoId);
+
+        // 生成交易流水号，这里的order没有定义自增id
+        OrderDo orderDo = new OrderDo();
+        try {
+            orderModel.setId(generateOrderNo());
+            orderDo = convertFromOrderModelToOrderDo(orderModel);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        orderDoMapper.insertSelective(orderDo);
+        // 加上商品销量
+        itemService.increseSales(itemId, amount);
+        // 4、返回前端
+
+        return orderModel;
+    }
 
     /**
      * 订单号有16位：

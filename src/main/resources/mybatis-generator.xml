@@ -47,7 +47,8 @@
         <!--<table schema="seckill" tableName="item" domainObjectName="ItemDo"></table>-->
         <!--<table schema="seckill" tableName="item_stock" domainObjectName="ItemStockDo"></table>-->
         <!--<table schema="seckill" tableName="order_info" domainObjectName="OrderDo"></table>-->
-        <table schema="seckill" tableName="sequence_info" domainObjectName="SequenceDo"></table>
+        <!--<table schema="seckill" tableName="sequence_info" domainObjectName="SequenceDo"></table>-->
+        <!--<table schema="seckill" tableName="promo" domainObjectName="PromoDo"></table>-->
 
 
         <!--<table schema="DB2ADMIN" tableName="ALLTYPES" domainObjectName="Customer">-->

@@ -1,5 +1,7 @@
 package slf.xbb.controller;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -12,6 +14,7 @@ import slf.xbb.service.impl.ItemServiceImpl;
 import slf.xbb.service.model.ItemModel;
 
 import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -97,6 +100,27 @@ public class ItemController extends BaseController {
         }
         ItemVo itemVo = new ItemVo();
         BeanUtils.copyProperties(itemModel, itemVo);
+        if (itemModel.getPromoModel() != null) {
+            // 有正在进行或即将进行的活动
+            try {
+                // itemVo.getPromoVo().setPromoStatus(itemModel.getPromoModel().getStatus());
+                // itemVo.getPromoVo().setPromoId(itemModel.getPromoModel().getId());
+                // itemVo.getPromoVo().setPromoPrice(itemModel.getPromoModel().getPromoItemPrice());
+                // itemVo.getPromoVo().setStartData(itemModel.getPromoModel().getStartDate());
+                // itemVo.getPromoVo().setEndData(itemModel.getPromoModel().getEndDate());
+                itemVo.setPromoStatus(itemModel.getPromoModel().getStatus());
+                itemVo.setPromoId(itemModel.getPromoModel().getId());
+                itemVo.setPromoPrice(itemModel.getPromoModel().getPromoItemPrice());
+                itemVo.setPromoStartDate(itemModel.getPromoModel().getStartDate().toString(DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")));
+                itemVo.setPromoEndDate(itemModel.getPromoModel().getEndDate().toString(DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")));
+                // itemVo.setPromoStartDate(itemModel.getPromoModel().getStartDate().toString(DateTimeFormat.fullDateTime()));
+                // itemVo.setPromoEndDate(itemModel.getPromoModel().getEndDate().toString(DateTimeFormat.fullDateTime()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            itemVo.setPromoStatus(0);
+        }
         return itemVo;
     }
 }
