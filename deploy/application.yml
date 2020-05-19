@@ -4,3 +4,11 @@ server:
       accept-count: 1000
       max-threads: 800
       min-spare-threads: 100
+spring:
+  datasource:
+    username: root
+    password: 123
+    url: jdbc:mysql://123.57.204.209/seckill?useSSL=false&useUnicode=true&characterEncoding=utf-8
+    driver‐class‐name: com.mysql.jdbc.Driver
+    #自定义使用druid数据源
+    type: com.alibaba.druid.pool.DruidDataSource
