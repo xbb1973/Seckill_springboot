@@ -71,7 +71,8 @@
         //映射到后端@RequestMapping(value = "/item/get", method = {RequestMethod.POST}, consumes = {CONTENT_TYPE_FORMED})
         $.ajax({
             type: "GET",
-            url: "http://localhost:8080/item/get",
+            url: "http://123.57.204.209:80/item/get",
+            // url: "http://localhost:8080/item/get",
             data: {
                 "id": getParam("id"),
             },
@@ -96,7 +97,8 @@
             //映射到后端@RequestMapping(value = "/item/get", method = {RequestMethod.POST}, consumes = {CONTENT_TYPE_FORMED})
             $.ajax({
                 type: "POST",
-                url: "http://localhost:8080/order/create",
+                url: "http://123.57.204.209:80/order/create",
+                // url: "http://localhost:8080/order/create",
                 contentType: "application/x-www-form-urlencoded",
                 data: {
                     "itemId": g_itemVo.id,

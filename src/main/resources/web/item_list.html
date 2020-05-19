@@ -38,7 +38,8 @@
         //映射到后端@RequestMapping(value = "/item/list", method = {RequestMethod.POST}, consumes = {CONTENT_TYPE_FORMED})
         $.ajax({
             type: "GET",
-            url: "http://localhost:8080/item/list",
+            url: "http://123.57.204.209:80/item/list",
+            // url: "http://localhost:8080/item/list",
             //允许跨域请求
             xhrFields: {withCredentials: true, allowCredentials: "*"},
             success: function (data) {

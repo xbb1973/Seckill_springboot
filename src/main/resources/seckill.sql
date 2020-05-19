@@ -94,8 +94,8 @@ CREATE TABLE `promo`  (
 -- ----------------------------
 -- Records of promo
 -- ----------------------------
-INSERT INTO `promo` VALUES (1, 'iphone大减价', '2020-03-31 19:55:47', '2019-04-02 19:55:52', 1, 23.00);
-INSERT INTO `promo` VALUES (2, 'iphone8大减价', '2020-03-31 20:17:17', '2019-04-02 20:18:18', 3, 3.00);
+INSERT INTO `promo` VALUES (1, 'iphone大减价', '2020-05-31 19:55:47', '2019-06-02 19:55:52', 1, 23.00);
+INSERT INTO `promo` VALUES (2, 'iphone8大减价', '2020-05-31 20:17:17', '2019-06-02 20:18:18', 3, 3.00);
 
 -- ----------------------------
 -- Table structure for sequence_info
