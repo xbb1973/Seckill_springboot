@@ -47,7 +47,7 @@ public class OrderController extends BaseController {
                                         @RequestParam(name = "amount") Integer amount,
                                         @RequestParam(name = "promoId") Integer promoId) throws BussinessException {
         //获取用户的登陆信息
-        Boolean is_login = (Boolean) httpServletRequest.getSession().getAttribute("IS_LOGIN");
+        Boolean is_login = (Boolean) this.httpServletRequest.getSession().getAttribute("IS_LOGIN");
         if (is_login == null || !is_login.booleanValue()) {
             throw new BussinessException(EmBusinessError.USER_NOT_LOGIN);
         }
