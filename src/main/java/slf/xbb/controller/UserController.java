@@ -6,6 +6,7 @@ import org.apache.tomcat.util.security.MD5Encoder;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author ：xbb
@@ -45,6 +48,9 @@ public class UserController extends BaseController {
 
     @Autowired
     private HttpServletRequest httpServletRequest;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 用户登陆接口
@@ -67,10 +73,23 @@ public class UserController extends BaseController {
 
         // 将登陆凭证加入到用户登陆成功的session内
         // 进阶-分布式-token实现
-        this.httpServletRequest.getSession().setAttribute("IS_LOGIN", true);
-        this.httpServletRequest.getSession().setAttribute("LOGIN_USER", userModel);
+        // this.httpServletRequest.getSession().setAttribute("IS_LOGIN", true);
+        // this.httpServletRequest.getSession().setAttribute("LOGIN_USER", userModel);
+        // return CommonReturnType.create(null);
 
-        return CommonReturnType.create(null);
+        // 1、分布式session实现，通过导入redis依赖，将session从存入tomcat内存改为存入redis缓存
+
+        // 2、Token实现
+        // 生成登陆凭证Token，UUID全局唯一
+        String uuidToken = UUID.randomUUID().toString();
+        uuidToken = uuidToken.replace("-", "");
+        // 建立Token和用户登陆态之间的联系
+        redisTemplate.opsForValue().set(uuidToken, userModel);
+        redisTemplate.expire(uuidToken, 1, TimeUnit.HOURS);
+        // 下发Token
+        return CommonReturnType.create(uuidToken);
+
+
     }
 
     /**

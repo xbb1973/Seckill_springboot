@@ -98,10 +98,16 @@
         });
 
         $("#create_order").on("click", function () {
+            var token = window.localStorage["token"];
+            if (token == null) {
+                alert("没有登陆，不能下单");
+                window.location.href = "user_login.html";
+                return false;
+            }
             //映射到后端@RequestMapping(value = "/item/get", method = {RequestMethod.POST}, consumes = {CONTENT_TYPE_FORMED})
             $.ajax({
                 type: "POST",
-                url: "http://"+g_host+"/order/create",
+                url: "http://"+g_host+"/order/create?token=" + token,
                 // url: "http://123.57.204.209:80/order/create",
                 // url: "http://localhost:8080/order/create",
                 contentType: "application/x-www-form-urlencoded",
