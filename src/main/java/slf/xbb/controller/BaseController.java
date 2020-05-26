@@ -29,15 +29,16 @@ public class BaseController {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public Object handleException(Exception e, HttpServletRequest request) {
+    public Object handleException(Exception e, HttpServletRequest request) throws Exception {
         BussinessException bussinessException = e instanceof BussinessException ? ((BussinessException) e) : null;
         Map<String, Object> respData = new HashMap<>();
         if (bussinessException != null) {
             respData.put("errCode", bussinessException.getErrCode());
             respData.put("errMsg", bussinessException.getErrMsg());
         } else {
-            respData.put("errCode", EmBusinessError.UNKNOWN_ERROR.getErrCode());
-            respData.put("errMsg", EmBusinessError.UNKNOWN_ERROR.getErrMsg());
+            throw new Exception(e);
+            // respData.put("errCode", EmBusinessError.UNKNOWN_ERROR.getErrCode());
+            // respData.put("errMsg", EmBusinessError.UNKNOWN_ERROR.getErrMsg());
         }
         return CommonReturnType.create(respData, "fail");
     }

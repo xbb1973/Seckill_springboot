@@ -3,6 +3,7 @@ package slf.xbb.service.model;
 import lombok.Data;
 import org.joda.time.DateTime;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
@@ -13,7 +14,7 @@ import java.math.BigDecimal;
  * @version:
  */
 @Data
-public class PromoModel {
+public class PromoModel implements Serializable {
     /**
      * 促销秒杀信息id
      */

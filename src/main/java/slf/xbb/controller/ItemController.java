@@ -4,18 +4,22 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import slf.xbb.controller.view.ItemVo;
 import slf.xbb.error.BussinessException;
 import slf.xbb.response.CommonReturnType;
+import slf.xbb.service.CacheService;
 import slf.xbb.service.ItemService;
 import slf.xbb.service.impl.ItemServiceImpl;
 import slf.xbb.service.model.ItemModel;
 
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -32,6 +36,12 @@ public class ItemController extends BaseController {
 
     @Autowired
     private ItemService itemService;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    @Autowired
+    private CacheService cacheService;
 
     /**
      * 创建商品的controller，尽量使controller简单，让service复杂，把服务逻辑聚合在service内部
@@ -70,10 +80,28 @@ public class ItemController extends BaseController {
     @ResponseBody
     public CommonReturnType getItem(@RequestParam(name = "id") Integer id) throws BussinessException {
 
-        // 封装service请求用来创建商品
-        ItemModel itemModel = new ItemModel();
-        itemModel = itemService.getItemById(id);
-        //
+        String key = "item_" + id;
+        ItemModel itemModel = null;
+        // 1、JVM本地缓存
+        itemModel = (ItemModel) cacheService.getFromCommonCache(key);
+        if (itemModel == null) {
+            // 2、Redis单机版缓存
+            // 2.1、根据id获取model
+            itemModel = (ItemModel) redisTemplate.opsForValue().get(key);
+            // 3、SQL数据库
+            if (itemModel == null) {
+                // 封装service请求用来创建商品
+                itemModel = itemService.getItemById(id);
+                redisTemplate.opsForValue().set(key, itemModel);
+                redisTemplate.expire(key, 10, TimeUnit.MINUTES);
+            }
+            // 1.1 填充本地缓存
+            cacheService.setCommonCache(key, itemModel);
+        }
+
+        // // 封装service请求用来创建商品
+        // itemModel = itemService.getItemById(id);
+        // BO转化为VO返回给前端
         ItemVo itemVo = convertFromItemModelToItemVo(itemModel);
         return CommonReturnType.create(itemVo);
     }
@@ -91,7 +119,6 @@ public class ItemController extends BaseController {
         }).collect(Collectors.toList());
         return CommonReturnType.create(itemVoList);
     }
-
 
 
     private ItemVo convertFromItemModelToItemVo(ItemModel itemModel) {

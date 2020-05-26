@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import slf.xbb.dao.ItemDoMapper;
 import slf.xbb.dao.ItemStockDoMapper;
-import slf.xbb.dao.PromoDoMapper;
 import slf.xbb.domain.ItemDo;
 import slf.xbb.domain.ItemStockDo;
 import slf.xbb.error.BussinessException;
