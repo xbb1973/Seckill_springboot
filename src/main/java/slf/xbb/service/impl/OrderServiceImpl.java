@@ -112,8 +112,15 @@ public class OrderServiceImpl implements OrderService {
     public OrderModel createOrder(Integer userId, Integer itemId, Integer promoId, Integer amount) throws BussinessException {
 
         // 1、(校验商品、用户、活动信息等)检验下单状态，下单的商品是否存在，用户是否合法，购买数量是否正确
-        UserModel userModel = userService.getUserById(userId);
-        ItemModel itemModel = itemService.getItemById(itemId);
+        // 访问2次db
+        // UserModel userModel = userService.getUserById(userId);
+        // 访问3次db
+        // ItemModel itemModel = itemService.getItemById(itemId);
+        // 将userModel、itemModel转化为缓存模型
+        ItemModel itemModel = itemService.getItemByIdInCache(itemId);
+        UserModel userModel = userService.getUserByIdInCache(userId);
+
+        // 校验
         if (userModel == null || itemModel == null || (amount <= 0 || amount > 99)) {
             throw new BussinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "商品/用户信息/购买数量：参数异常");
         }
@@ -129,12 +136,20 @@ public class OrderServiceImpl implements OrderService {
             }
         }
         // 2、落单减库存 / 支付减库存（支付减库存会出现超卖的问题）
+        // 热点操作，
+        // <update id="decreaseStock">
+        //         update item_stock
+        //         set stock = stock -  #{amount,jdbcType=INTEGER}
+        //         where item_id = #{itemId,jdbcType=INTEGER}   #此处对item_id有行锁
+        //             and stock >= #{amount,jdbcType=INTEGER}
+        //     </update>
         boolean hasDecreaseStock = itemService.decreaseStock(itemId, amount);
         if (!hasDecreaseStock) {
             throw new BussinessException(EmBusinessError.STOCK_NOT_ENOUGH);
         }
 
         // 3、订单入库
+        // 数据封装填充
         OrderModel orderModel = new OrderModel();
         orderModel.setItemId(itemId);
         orderModel.setUserId(userId);

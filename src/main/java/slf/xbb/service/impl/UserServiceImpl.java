@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import slf.xbb.dao.UserDoMapper;
@@ -17,6 +18,8 @@ import slf.xbb.service.UserService;
 import slf.xbb.service.model.UserModel;
 import slf.xbb.validator.ValidationResult;
 import slf.xbb.validator.ValidatorImpl;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author ：xbb
@@ -37,6 +40,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private ValidatorImpl validator;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Override
     public UserModel validateLogin(String telphone, String encryptPassword) throws BussinessException {
@@ -62,6 +68,19 @@ public class UserServiceImpl implements UserService {
         UserDo userDo = userDoMapper.selectByPrimaryKey(id);
         UserPasswordDo userPasswordDo = userPasswordDoMapper.selectByUserId(id);
         return convertFromDataObject(userDo, userPasswordDo);
+    }
+
+
+    @Override
+    public UserModel getUserByIdInCache(Integer id) {
+        String key = "user_validate_" + id;
+        UserModel userModel = (UserModel) redisTemplate.opsForValue().get(key);
+        if (userModel == null) {
+            userModel = getUserById(id);
+            redisTemplate.opsForValue().set(key, userModel);
+            redisTemplate.expire(key, 10, TimeUnit.MINUTES);
+        }
+        return userModel;
     }
 
     @Override

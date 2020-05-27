@@ -34,4 +34,11 @@ public interface UserService {
      * @throws BussinessException
      */
     UserModel validateLogin(String telphone, String encryptPassword) throws BussinessException;
+
+    /**
+     * 缓存模型
+     * @param userId
+     * @return
+     */
+    UserModel getUserByIdInCache(Integer userId);
 }

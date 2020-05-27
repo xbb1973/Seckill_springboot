@@ -14,20 +14,36 @@ import java.util.List;
  * @version:
  */
 public interface ItemService {
+
     /**
      * 创建商品
+     * @param itemModel
+     * @return
+     * @throws BussinessException
      */
     ItemModel createItem(ItemModel itemModel) throws BussinessException;
 
     /**
      * 商品列表浏览
+     * @return
      */
     List<ItemModel> listItem();
 
     /**
-     * 商品详情浏览
+     * 获取ItemModel商品信息
+     * 通过访问数据库聚合
+     * @param id
+     * @return
      */
     ItemModel getItemById(Integer id);
+
+    /**
+     * 获取itemModel 内聚了 promoModel
+     * 通过缓存访问
+     * @param id
+     * @return
+     */
+    ItemModel getItemByIdInCache(Integer id);
 
     /**
      * 削减库存

@@ -3,6 +3,7 @@ package slf.xbb.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import slf.xbb.dao.ItemDoMapper;
@@ -19,6 +20,7 @@ import slf.xbb.validator.ValidationResult;
 import slf.xbb.validator.ValidatorImpl;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -43,6 +45,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Autowired
     private PromoService promoService;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 创建商品
@@ -89,6 +94,7 @@ public class ItemServiceImpl implements ItemService {
      * 商品详情浏览
      *
      * @param id
+     * @return itemModel
      */
     @Override
     public ItemModel getItemById(Integer id) {
@@ -111,6 +117,26 @@ public class ItemServiceImpl implements ItemService {
 
         return itemModel;
     }
+
+    /**
+     * 获取itemModel 内聚了 promoModel
+     * 通过缓存访问
+     *
+     * @param id
+     * @return itemModel
+     */
+    @Override
+    public ItemModel getItemByIdInCache(Integer id) {
+        String key = "item_validate_" + id;
+        ItemModel itemModel = (ItemModel) redisTemplate.opsForValue().get(key);
+        if (itemModel == null) {
+            itemModel = this.getItemById(id);
+            redisTemplate.opsForValue().set(key, itemModel);
+            redisTemplate.expire(key, 10, TimeUnit.MINUTES);
+        }
+        return itemModel;
+    }
+
 
     /**
      * 削减库存
