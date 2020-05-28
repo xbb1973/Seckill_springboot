@@ -5,9 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import slf.xbb.controller.view.OrderVo;
+import slf.xbb.dao.ItemStockLogDoMapper;
 import slf.xbb.dao.OrderDoMapper;
 import slf.xbb.dao.SequenceDoMapper;
+import slf.xbb.domain.ItemStockLogDo;
 import slf.xbb.domain.OrderDo;
 import slf.xbb.domain.SequenceDo;
 import slf.xbb.error.BussinessException;
@@ -19,11 +20,9 @@ import slf.xbb.service.model.ItemModel;
 import slf.xbb.service.model.OrderModel;
 import slf.xbb.service.model.UserModel;
 
-import javax.xml.crypto.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 /**
  * @author ：xbb
@@ -43,6 +42,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrderDoMapper orderDoMapper;
+
+    @Autowired
+    private ItemStockLogDoMapper itemStockLogDoMapper;
 
     @Autowired
     private SequenceDoMapper sequenceDoMapper;
@@ -105,11 +107,12 @@ public class OrderServiceImpl implements OrderService {
      * @param itemId
      * @param promoId
      * @param amount
+     * @param itemStockLogId
      * @return
      */
     @Transactional
     @Override
-    public OrderModel createOrder(Integer userId, Integer itemId, Integer promoId, Integer amount) throws BussinessException {
+    public OrderModel createOrder(Integer userId, Integer itemId, Integer promoId, Integer amount, String itemStockLogId) throws BussinessException {
 
         // 1、(校验商品、用户、活动信息等)检验下单状态，下单的商品是否存在，用户是否合法，购买数量是否正确
         // 访问2次db
@@ -136,7 +139,7 @@ public class OrderServiceImpl implements OrderService {
             }
         }
         // 2、落单减库存 / 支付减库存（支付减库存会出现超卖的问题）
-        // 热点操作，
+        // 热点操作，Redis缓存
         // <update id="decreaseStock">
         //         update item_stock
         //         set stock = stock -  #{amount,jdbcType=INTEGER}
@@ -171,10 +174,45 @@ public class OrderServiceImpl implements OrderService {
             e.printStackTrace();
         }
         orderDoMapper.insertSelective(orderDo);
+
         // 加上商品销量
         itemService.increseSales(itemId, amount);
-        // 4、返回前端
 
+        // 设置库存流水状态为成功
+        // 这个操作看来没有提升性能，
+        // 但实际上这个流水的操作针对的是itemStockLogId的行锁
+        // 对不同的行锁操作，没有竞争、等待的压力，
+        // 目前的压力瓶颈是item_id的行锁。
+        ItemStockLogDo itemStockLogDo = itemStockLogDoMapper.selectByPrimaryKey(itemStockLogId);
+        if (itemStockLogDo == null) {
+            throw new BussinessException(EmBusinessError.UNKNOWN_ERROR);
+        }
+        itemStockLogDo.setStatus(2);
+        itemStockLogDoMapper.updateByPrimaryKeySelective(itemStockLogDo);
+
+        // 解决事务执行没问题，最后commit失败导致无法回滚Redis库存
+        // TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+        //     @Override
+        //     public void afterCommit() {
+        //         // 异步更新库存，规避无法回补Redis库存的问题
+        //         boolean mqDecStockResult = itemService.asyncDecreaseStock(itemId, amount);
+        //         // 问题：此处的消息发送失败无法处理
+        //         // if (!mqDecStockResult) {
+        //         //     itemService.increaseRedisStock(itemId, amount);
+        //         //     throw new BussinessException(EmBusinessError.MQ_STOCK_FAIL);
+        //         // }
+        //     }
+        // });
+
+        // 异步更新库存，规避无法回补Redis库存的问题
+        // 问题：transaction事务最后commit失败时，上述方案仍旧无效，
+        // boolean mqDecStockResult = itemService.asyncDecreaseStock(itemId, amount);
+        // if (!mqDecStockResult) {
+        //     itemService.increaseRedisStock(itemId, amount);
+        //     throw new BussinessException(EmBusinessError.MQ_STOCK_FAIL);
+        // }
+
+        // 4、返回前端
         return orderModel;
     }
 

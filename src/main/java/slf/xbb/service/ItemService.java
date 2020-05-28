@@ -54,9 +54,40 @@ public interface ItemService {
     boolean decreaseStock(Integer itemId, Integer amount);
 
     /**
+     * 异步削减库存
+     * @param itemId
+     * @param amount
+     * @return
+     */
+    boolean asyncDecreaseStock(Integer itemId, Integer amount);
+
+    /**
+     *
+     * @param itemId
+     * @param amount
+     * @return
+     */
+    boolean increaseRedisStock(Integer itemId, Integer amount);
+
+    /**
+     *
+     * @param itemId
+     * @param amount
+     * @return
+     */
+    boolean asyncIncreaseStock(Integer itemId, Integer amount);
+
+    /**
      * 商品销量增加，意味着库存削减成功，下单成功
      * @param itemId
      * @param amount
      */
     void increseSales(Integer itemId, Integer amount);
+
+    /**
+     * 初始化库存流水
+     * @param itemId
+     * @param amount
+     */
+    String initItemStockLog(Integer itemId, Integer amount);
 }

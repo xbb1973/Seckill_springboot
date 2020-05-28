@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.*;
 import slf.xbb.controller.view.OrderVo;
 import slf.xbb.error.BussinessException;
 import slf.xbb.error.EmBusinessError;
+import slf.xbb.mq.MqProducer;
 import slf.xbb.response.CommonReturnType;
+import slf.xbb.service.ItemService;
 import slf.xbb.service.OrderService;
 import slf.xbb.service.model.OrderModel;
 import slf.xbb.service.model.UserModel;
@@ -38,6 +40,13 @@ public class OrderController extends BaseController {
 
     @Autowired
     private RedisTemplate redisTemplate;
+
+    @Autowired
+    private MqProducer mqProducer;
+
+    @Autowired
+    private ItemService itemService;
+
 
     /**
      * 封装下单请求
@@ -70,10 +79,19 @@ public class OrderController extends BaseController {
             throw new BussinessException(EmBusinessError.USER_NOT_LOGIN);
         }
 
-        OrderModel orderModel = null;
+        // 判断售罄状态，利用redis，避免了使用库存流水来判断售罄
+        if (redisTemplate.hasKey("promo_item_stock_invalid_" + itemId)) {
+            throw new BussinessException(EmBusinessError.STOCK_INVALID);
+        }
+        // 加入库存流水init状态
+        String itemStockLogId = itemService.initItemStockLog(itemId, amount);
+
+        // OrderModel orderModel = null;
         // orderModel = orderService.createOrder(userModel.getId(), itemId, amount);
-        orderModel = orderService.createOrder(userModel.getId(), itemId, promoId, amount);
-        return CommonReturnType.create(orderModel);
+        // orderModel = orderService.createOrder(userModel.getId(), itemId, promoId, amount);
+        // return CommonReturnType.create(orderModel);
+        boolean hasTransactionAsyncReduceStock = mqProducer.transactionAsyncReduceStock(userModel.getId(), itemId, promoId, amount, itemStockLogId);
+        return CommonReturnType.create(null);
     }
 
     private OrderVo convertFromOrderModelToOrderVo(OrderModel orderModel) {

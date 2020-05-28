@@ -12,6 +12,7 @@ import slf.xbb.error.BussinessException;
 import slf.xbb.response.CommonReturnType;
 import slf.xbb.service.CacheService;
 import slf.xbb.service.ItemService;
+import slf.xbb.service.PromoService;
 import slf.xbb.service.impl.ItemServiceImpl;
 import slf.xbb.service.model.ItemModel;
 
@@ -43,6 +44,15 @@ public class ItemController extends BaseController {
     @Autowired
     private CacheService cacheService;
 
+    @Autowired
+    private PromoService promoService;
+
+    @RequestMapping(path = "/publishpromo", method = RequestMethod.GET)
+    @ResponseBody
+    public CommonReturnType createItem(@RequestParam(name = "id") Integer id) {
+        promoService.publishPromo(id);
+        return CommonReturnType.create(null);
+    }
     /**
      * 创建商品的controller，尽量使controller简单，让service复杂，把服务逻辑聚合在service内部
      *

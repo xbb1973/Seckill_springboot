@@ -18,4 +18,12 @@ public interface PromoService {
      */
     PromoModel getPromoByItemId(Integer itemId);
 
+    /**
+     * @Description: 活动发布时同步库存到缓存，为优化串行库存操作做准备
+     * @Param:
+     * @return:
+     * @Date: 2020/5/28 
+     * @Author: xbb1973
+     */
+    void publishPromo(Integer promoId);
 }

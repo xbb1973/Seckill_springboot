@@ -3,14 +3,18 @@ package slf.xbb.service.impl;
 import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import slf.xbb.dao.PromoDoMapper;
 import slf.xbb.domain.PromoDo;
+import slf.xbb.service.ItemService;
 import slf.xbb.service.PromoService;
+import slf.xbb.service.model.ItemModel;
 import slf.xbb.service.model.PromoModel;
 
 import javax.xml.crypto.Data;
 import java.sql.DataTruncation;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author ：xbb
@@ -24,6 +28,12 @@ public class PromoServiceImpl implements PromoService {
 
     @Autowired
     PromoDoMapper promoDoMapper;
+
+    @Autowired
+    ItemService itemService;
+
+    @Autowired
+    RedisTemplate redisTemplate;
 
     /**
      * 通过itemId获取促销秒杀信息，才能对前端显示做修改
@@ -43,6 +53,36 @@ public class PromoServiceImpl implements PromoService {
         int status = NowDateCompareToPromoDate(promoModel.getStartDate(), promoModel.getEndDate());
         promoModel.setStatus(status);
         return promoModel;
+    }
+
+    /**
+     * @param promoId
+     * @Description: 活动发布时同步库存到缓存，为优化串行库存操作做准备
+     * @Param:
+     * @return:
+     * @Date: 2020/5/28
+     * @Author: xbb1973
+     */
+    @Override
+    public void publishPromo(Integer promoId) {
+        // 通过活动id获得活动
+        PromoDo promoDo = promoDoMapper.selectByItemId(promoId);
+        if (promoDo == null || promoDo.getItemId() == null || promoDo.getItemId().intValue() == 0){
+            return;
+        }
+        PromoModel promoModel = covertFromPromoDoToPromoModel(promoDo);
+        if (promoModel == null) {
+            return;
+        }
+        // 此时商品可能被售卖，此时需要额外添加上下架操作
+        // 假设库存不会发生变化进行处理
+        String key = "promo_item_stock_" + promoDo.getItemId();
+        ItemModel itemModel = itemService.getItemByIdInCache(promoDo.getItemId());
+        // 将库存同步到redis内
+        redisTemplate.opsForValue().set(key, itemModel.getStock());
+        redisTemplate.expire(key, 5, TimeUnit.MINUTES);
+        // 此时应该由运营后台来调用该方法，发布promo
+        // 这里不考虑，直接在ItemController发布
     }
 
 

@@ -110,6 +110,12 @@
       <version>18.0</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.rocketmq</groupId>
+      <artifactId>rocketmq-client</artifactId>
+      <version>4.3.0</version>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -192,7 +198,7 @@
             <verbose>true</verbose>
             <!--允许自动覆盖文件（生产环境中千万不要这样做）-->
             <!--目前项目中的mapper中有些自定义的方法，覆盖文件会吃屎。。。-->
-            <overwrite>false</overwrite>
+            <overwrite>true</overwrite>
             <configurationFile>
               src/main/resources/mybatis-generator.xml
             </configurationFile>

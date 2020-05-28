@@ -17,3 +17,7 @@ spring:
                 min-idle: 20
 mybatis:
     mapper-locations: classpath:mapping/*Mapper.xml
+mq:
+    nameserver:
+        addr: 127.0.0.1:9876
+    topicname: stock

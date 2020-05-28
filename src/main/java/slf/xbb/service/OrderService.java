@@ -33,9 +33,10 @@ public interface OrderService {
      * @param itemId
      * @param promoId
      * @param amount
+     * @param itemStockLogId
      * @return
      */
-    OrderModel createOrder(Integer userId, Integer itemId, Integer promoId, Integer amount) throws BussinessException;
+    OrderModel createOrder(Integer userId, Integer itemId, Integer promoId, Integer amount, String itemStockLogId) throws BussinessException;
 
 
 
