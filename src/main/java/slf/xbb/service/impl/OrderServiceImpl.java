@@ -120,24 +120,32 @@ public class OrderServiceImpl implements OrderService {
         // 访问3次db
         // ItemModel itemModel = itemService.getItemById(itemId);
         // 将userModel、itemModel转化为缓存模型
+
         ItemModel itemModel = itemService.getItemByIdInCache(itemId);
         UserModel userModel = userService.getUserByIdInCache(userId);
 
         // 校验
-        if (userModel == null || itemModel == null || (amount <= 0 || amount > 99)) {
+        // 此处由Token代为校验item和user合法性，不需要下单接口再校验一次
+        // if (userModel == null || itemModel == null || (amount <= 0 || amount > 99)) {
+        //     throw new BussinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "商品/用户信息/购买数量：参数异常");
+        // }
+        if ((amount <= 0 || amount > 99)) {
             throw new BussinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "商品/用户信息/购买数量：参数异常");
         }
+
+        // 由token代替校验，下单接口不必再校验
         // 校验活动信息
-        if (promoId != null) {
-            // 校验活动是否存在这个使用商品
-            // 校验活动是否进行中
-            //
-            if (promoId.intValue() != itemModel.getPromoModel().getId()) {
-                throw new BussinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "活动信息不正确");
-            } else if (itemModel.getPromoModel().getStatus() != 2) {
-                throw new BussinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "活动还未开始");
-            }
-        }
+        // if (promoId != null) {
+        //     // 校验活动是否存在这个使用商品
+        //     // 校验活动是否进行中
+        //     //
+        //     if (promoId.intValue() != itemModel.getPromoModel().getId()) {
+        //         throw new BussinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "活动信息不正确");
+        //     } else if (itemModel.getPromoModel().getStatus() != 2) {
+        //         throw new BussinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "活动还未开始");
+        //     }
+        // }
+
         // 2、落单减库存 / 支付减库存（支付减库存会出现超卖的问题）
         // 热点操作，Redis缓存
         // <update id="decreaseStock">

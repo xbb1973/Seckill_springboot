@@ -26,4 +26,13 @@ public interface PromoService {
      * @Author: xbb1973
      */
     void publishPromo(Integer promoId);
+    
+    /**
+     * @Description:  
+     * @Param:  
+     * @return:  
+     * @Date: 2020/6/24 
+     * @Author: xbb1973
+     */
+    String genSeckillToken(Integer promoId, Integer itemId, Integer userId);
 }

@@ -104,33 +104,61 @@
                 window.location.href = "user_login.html";
                 return false;
             }
+
             //映射到后端@RequestMapping(value = "/item/get", method = {RequestMethod.POST}, consumes = {CONTENT_TYPE_FORMED})
             $.ajax({
                 type: "POST",
-                url: "http://"+g_host+"/order/create?token=" + token,
-                // url: "http://123.57.204.209:80/order/create",
-                // url: "http://localhost:8080/order/create",
+                url: "http://"+g_host+"/order/genseckilltoken?token=" + token,
                 contentType: "application/x-www-form-urlencoded",
                 data: {
                     "itemId": g_itemVo.id,
-                    "amount": 1,
                     "promoId": g_itemVo.promoId,
                 },
                 //允许跨域请求
                 xhrFields: {withCredentials: true},
                 success: function (data) {
                     if (data.status == "success") {
-                        alert("下单成功");
-                        window.location.reload();
+                        var promoToken = data.data;
+                        // alert("下单成功");
+                        // window.location.reload();
+                        $.ajax({
+                            type: "POST",
+                            url: "http://"+g_host+"/order/create?token=" + token,
+                            // url: "http://123.57.204.209:80/order/create",
+                            // url: "http://localhost:8080/order/create",
+                            contentType: "application/x-www-form-urlencoded",
+                            data: {
+                                "itemId": g_itemVo.id,
+                                "amount": 1,
+                                "promoId": g_itemVo.promoId,
+                                "promoToken": promoToken,
+                            },
+                            //允许跨域请求
+                            xhrFields: {withCredentials: true},
+                            success: function (data) {
+                                if (data.status == "success") {
+                                    alert("下单成功");
+                                    window.location.reload();
+                                } else {
+                                    alert("下单失败，原因为" + data.data.errMsg);
+                                    if (data.data.errCode == 505) {
+                                        window.location.href = "user_login.html";
+                                    }
+                                }
+                            },
+                            error: function (data) {
+                                alert("获取令牌失败，原因为" + data.responseText);
+                            }
+                        });
                     } else {
-                        alert("下单失败，原因为" + data.data.errMsg);
+                        alert("获取令牌失败，原因为" + data.data.errMsg);
                         if (data.data.errCode == 505) {
                             window.location.href = "user_login.html";
                         }
                     }
                 },
                 error: function (data) {
-                    alert("下单失败，原因为" + data.responseText);
+                    alert("获取令牌失败，原因为" + data.responseText);
                 }
             });
             return false;
